@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using System.ComponentModel;
+using System.Numerics;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace TextRPG_project
@@ -6,7 +8,7 @@ namespace TextRPG_project
     internal class Program
     {
         static List<Item> itemList = new List<Item>(); // 아이템 리스트 초기화;
-        public enum DungeonDiff { 쉬운 = 1, 일반, 어려운}
+        public enum DungeonDiff { 쉬운 = 5, 일반 = 11, 어려운 = 17}
         static string Start()
         {
             Console.Clear();
@@ -122,7 +124,7 @@ namespace TextRPG_project
             
         class Character
         {
-            private int level;
+            public int level;
             private string name;
             private int class_type;     //전사일 경우 1, 도적일 경우 2
             public int attack;
@@ -131,7 +133,7 @@ namespace TextRPG_project
             public int gold;
             private int itemAttack;     //아이템으로 올라간 총 공격력
             private int itemDefence;    //아이템으로 올라간 총 방어력
-
+            public int numberDungeonClear;
             public List<Item> items;   // 인벤토리의 아이템
             private Item? equippedArmor;
             private Item? equippedWeapon;
@@ -145,6 +147,7 @@ namespace TextRPG_project
                 health = 100;
                 gold = 1500;
                 items = new List<Item>();
+                numberDungeonClear = 0;
                 itemAttack = 0;
                 itemDefence = 0;
                 equippedArmor = null;
@@ -174,17 +177,18 @@ namespace TextRPG_project
                 Console.WriteLine("상태 보기");
                 Console.WriteLine("캐릭터의 정보가 표시됩니다.\n");
 
-                Console.WriteLine($"Lv : {level}");
-                Console.WriteLine($"이  름 : {name}");
-                Console.Write($"직  업 : ");
+                Console.WriteLine($"Level\t: {level}");
+                Console.WriteLine($"이  름\t: {name}");
+                Console.Write($"직  업\t: ");
                 if (class_type == 1) Console.WriteLine("전사");
                 else Console.WriteLine("도적");
-                Console.Write($"공격력 : {attack} ");
-                if (itemAttack > 0) Console.Write($"(+{itemAttack})");
-                Console.Write($"\n방어력 : {defence}");
-                if (itemDefence > 0) Console.Write($"(+{itemDefence})");
-                Console.WriteLine($"\n체  력 : {health}");
-                Console.WriteLine($"Gold : {gold}");
+                Console.Write($"공격력\t: {attack} ");
+                if (itemAttack > 0) Console.Write($"( +{itemAttack})");
+                Console.Write($"\n방어력\t: {defence}");
+                if (itemDefence > 0) Console.Write($"( +{itemDefence})");
+                Console.WriteLine($"\n체  력\t: {health}");
+                Console.WriteLine($"Gold\t: {gold}");
+                Console.WriteLine($"경험치\t: {numberDungeonClear} / {level}");
 
                 Console.WriteLine("\n0. 나가기");
                 Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
@@ -291,7 +295,8 @@ namespace TextRPG_project
             {
                 Console.Clear();
                 Console.WriteLine("휴식하기");
-                Console.WriteLine($"500 G 를 내면 체력을 회복할 수 있습니다. 보유 골드: {gold} G\n");
+                Console.WriteLine($"500 G 를 내면 체력을 회복할 수 있습니다. 보유 골드: {gold} G");
+                Console.WriteLine($"현재 체력: {health} / 100\n");
 
                 Console.WriteLine("1. 휴식 하기");
                 Console.WriteLine("0. 나가기");
@@ -412,7 +417,7 @@ namespace TextRPG_project
                 Console.Write("- ");
                 item.ShowItem();
                 if (!item.sold) Console.WriteLine($" | {item.price} G");
-                else Console.WriteLine(" | 판매 완료");
+                else Console.WriteLine(" | 구매 완료");
             }
 
             Console.WriteLine("\n1. 아이템 구매");
@@ -458,7 +463,7 @@ namespace TextRPG_project
                 Console.Write($"- {i+1} ");
                 items[i].ShowItem();
                 if (!items[i].sold) Console.WriteLine($" | {items[i].price} G");
-                else Console.WriteLine(" | 판매 완료");
+                else Console.WriteLine(" | 구매 완료");
             }
 
             Console.WriteLine("\n1. 아이템 구매");
@@ -578,7 +583,9 @@ namespace TextRPG_project
             int diff2 = 11;
             int diff3 = 17;
             Console.WriteLine("던전 입장");
-            Console.WriteLine("이곳에서 던전으로 들어가기 전 활동을 할 수 있습니다.\n");
+            Console.WriteLine("이곳에서 던전으로 들어가기 전 활동을 할 수 있습니다.");
+            Console.WriteLine($"현재 체력\t: {player.health}");
+            Console.WriteLine($"현재 방어력\t: {player.defence}\n");
 
             Console.WriteLine($"1. 쉬운 던전\t\t| 방어력 {diff1} 이상 권장");
             Console.WriteLine($"2. 일반 던전\t\t| 방어력 {diff2} 이상 권장");
@@ -587,22 +594,18 @@ namespace TextRPG_project
 
             Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
             string input = Console.ReadLine();
-            int multi;
             if (input == "1")
             {
-                multi = EnterDungeon(player, diff1);
-                if(player.health <= 0)
-                {
-                    GameOver();
-                }
+                EnterDungeon(player, diff1);
+
             }
             else if (input == "2")
             {
-                multi = EnterDungeon(player, diff2);
+                EnterDungeon(player, diff2);
             }
             else if (input == "3")
             {
-                multi = EnterDungeon(player, diff3);
+                EnterDungeon(player, diff3);
             }
             else if (input == "0")
             {
@@ -616,8 +619,9 @@ namespace TextRPG_project
             }
         }
 
-        static int EnterDungeon(Character player, int diff)
+        static void EnterDungeon(Character player, int diff)
         {
+            int[] dungeonGold = { 1000, 1700, 2500 };
             Random rand = new Random();
             int decreasedHealth;
             int result;
@@ -632,7 +636,8 @@ namespace TextRPG_project
                 if (win < 4)
                 {
                     result = 0;
-                    decreasedHealth = 50;
+                    if (player.health > 60) decreasedHealth = player.health / 2;
+                    else decreasedHealth = 30;
                 }
                 else
                 {
@@ -640,8 +645,57 @@ namespace TextRPG_project
                     result = rand.Next(100 + player.attack, 100 + player.attack * 2 + 1);   // 보상 배율 랜덤 설정
                 }
             }
-            player.health -= decreasedHealth;
-            return result;
+
+            Console.Clear();
+            if (player.health <= decreasedHealth)
+            {
+                GameOver();
+            }
+            else
+            {
+                if (result == 0) // 던전 클리어 실패 시
+                {
+                    Console.Clear();
+                    Console.WriteLine("던전 클리어 실패");
+                    Console.WriteLine("체력이 절반으로 줄어듭니다.");
+
+                    Console.WriteLine("\n[탐험 결과]");
+                    Console.WriteLine($"체력 {player.health} -> {player.health - decreasedHealth}");
+
+                    player.health -= decreasedHealth;
+                }
+                else            // 던전 클리어 시
+                {
+                    Console.WriteLine("던전 클리어");
+                    Console.WriteLine("축하합니다");
+                    Console.WriteLine($"{(DungeonDiff)diff} 던전을 클리어 하였습니다.");
+
+                    Console.WriteLine("\n[탐험 결과]");
+                    Console.WriteLine($"체력 {player.health} -> {player.health - decreasedHealth}");
+                    Console.WriteLine($"Gold {player.gold} -> {player.gold + dungeonGold[diff / 5 - 1] * result / 100}");
+
+                    player.health -= decreasedHealth;
+                    player.gold += dungeonGold[diff / 5 - 1] * result / 100;
+                    player.numberDungeonClear++;
+
+                    if (player.numberDungeonClear >= player.level)
+                    {
+                        player.level++;
+                        player.numberDungeonClear = 0;
+                        player.attack += player.level % 2; // 2레벨마다 1씩 오르게 설정
+                        player.defence += 1;
+
+                        Console.WriteLine("레벨업!");
+                        if (player.level % 2 == 1) Console.WriteLine("공격력이 1 증가했습니다.");
+                        Console.WriteLine("방어력이 1 증가했습니다.\n");
+                    }
+                }
+
+                Console.Write("\n돌아가려면 아무 키나 입력해주세요.\n>> ");
+                string input = Console.ReadLine();
+
+                DungeonMenu(player);
+            }
         }
 
         static void GameOver()
@@ -650,52 +704,6 @@ namespace TextRPG_project
             Console.WriteLine("게임 오버");
             Console.WriteLine("체력이 0 이하로 떨어졌습니다.");
 
-            //Console.WriteLine("\n1. 처음부터 다시 시작");
-            //Console.WriteLine("0. 나가기");
-
-            //string input = Console.ReadLine();
-            //if(input == "1")
-            //{
-            //    Start();
-            //}
-            //else if(input == "0")
-            //{
-                    
-            //}
-
-            //else
-            //{
-            //    Console.WriteLine("잘못된 입력입니다.");
-            //    Thread.Sleep(1000);
-            //    GameOver();
-            //}
-        }
-        
-        static void DungeonResult(int diff)
-        {
-            Console.Clear();
-            Console.WriteLine("던전 클리어");
-            Console.WriteLine("축하합니다");
-            Console.WriteLine($"{(DungeonDiff)diff} 던전을 클리어 하였습니다.");
-
-            Console.WriteLine("\n[탐험 결과]");
-            Console.WriteLine($"체력 {player.health} -> {player.health - decreasedHealth}");
-            Console.WriteLine($"Gold {player.gold} -> {player.gold + earnGold}");
-
-            Console.WriteLine("\n0. 나가기");
-
-            Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
-            string input = Console.ReadLine();
-            if(input == "0")
-            {
-                DungeonMenu(player);
-            }
-            else
-            {
-                Console.WriteLine("잘못된 입력입니다.");
-                Thread.Sleep(1000);
-                DungeonResult(diff);
-            }
         }
 
 
@@ -711,7 +719,7 @@ namespace TextRPG_project
             Character player = new Character(name, class_type); // player class 초기화
             itemList.Add(new Item("수련자 갑옷\t\t", 1, 5, 1000));
             itemList.Add(new Item("무쇠 갑옷\t\t", 1, 9, 2000));
-            itemList.Add(new Item("스파르타의 갑옷  \t", 1, 15, 3500));
+            itemList.Add(new Item("스파르타의 갑옷 \t", 1, 15, 3500));
             itemList.Add(new Item("낡은 검\t\t", 2, 2, 600));
             itemList.Add(new Item("청동 도끼\t\t", 2, 5, 1500));
             itemList.Add(new Item("스파르타의 창 \t", 2, 7, 2300));
