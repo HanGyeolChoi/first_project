@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Numerics;
-using System.Xml;
-using System.Xml.Linq;
+//using System.Xml;
+//using System.Xml.Linq;
+//using System.Xml.Serialization;
+
 
 namespace TextRPG_project
 {
@@ -706,6 +708,24 @@ namespace TextRPG_project
 
         }
 
+
+        //static void SaveCharacter(Character character, string filePath)
+        //{
+        //    XmlSerializer serializer = new XmlSerializer(typeof(Character));
+        //    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+        //    {
+        //        serializer.Serialize(stream, character);
+        //    }
+        //}
+
+        //static Character LoadCharacter(string filePath)
+        //{
+        //    XmlSerializer serializer = new XmlSerializer(typeof(Character));
+        //    using (FileStream stream = new FileStream(filePath, FileMode.Open))
+        //    {
+        //        return (Character)serializer.Deserialize(stream);
+        //    }
+        //}
 
 
         static void Main(string[] args)
