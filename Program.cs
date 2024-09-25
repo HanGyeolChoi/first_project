@@ -20,15 +20,15 @@ namespace TextRPG_project
             string name = Console.ReadLine();
 
             Console.WriteLine($"\n설정하신 이름은 {name}입니다.\n");
-            Console.WriteLine("1. 저장\n2. 취소\n");
-            Console.WriteLine("원하시는 행동을 선택해주세요.");
+            Console.WriteLine("1. 저장\n2. 취소");
 
-            string input = Console.ReadLine();
-            if (input == "1")
+            int input = CheckInput(1, 2);
+
+            if (input == 1)
             {
                 return name;
             }
-            else if (input == "2")
+            else if (input == 2)
             {
                 return Start();
             }
@@ -46,37 +46,25 @@ namespace TextRPG_project
             Console.Clear();
             Console.WriteLine("스파르타 던전에 오신 여러분 환영합니다.");
             Console.WriteLine("원하시는 직업을 선택해주세요.\n");
-            Console.WriteLine("1. 전사\n2. 도적");
-            Console.WriteLine("\n원하시는 행동을 선택해주세요.");
-            string class_type = Console.ReadLine();
+            Console.WriteLine("1. 전사\n2. 도적\n");
+            int class_type = CheckInput(1, 2);
 
-            if (class_type == "1") Console.WriteLine("\n고른 직업은 전사입니다.\n");
-            else if (class_type == "2") Console.WriteLine("\n고른 직업은 도적 입니다.\n");
-            else
+            if (class_type == 1) Console.WriteLine("\n고른 직업은 전사입니다.\n");
+            else if (class_type == 2) Console.WriteLine("\n고른 직업은 도적 입니다.\n");
+
+            Console.WriteLine("1. 저장\n2. 취소");
+
+            int input = CheckInput(1, 2);
+
+            if (input == 1)
             {
-                Console.WriteLine("\n잘못된 입력입니다.");
-                Thread.Sleep(1000);
-                return SelectClass();
+                return class_type;
             }
-            Console.WriteLine("1. 저장\n2. 취소\n");
-            Console.WriteLine("원하시는 행동을 선택해주세요.");
-
-            string input = Console.ReadLine();
-
-            if(input == "1")
-            {
-                return int.Parse(class_type);
-            }
-            else if(input == "2")
+            else 
             {
                 return SelectClass();
             }
-            else
-            {
-                Console.WriteLine("\n잘못된 입력입니다.");
-                Thread.Sleep(1000);
-                return SelectClass();
-            }
+
         }
         static void MainMenu(Character player)
         {
@@ -90,28 +78,27 @@ namespace TextRPG_project
             Console.WriteLine("4. 휴식하기");
             Console.WriteLine("5. 던전 입장");
             Console.WriteLine("0. 종료");
-            Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
 
-            string input = Console.ReadLine();
+            int input = CheckInput(0,5);
 
             switch (input)
             {
-                case "1":
+                case 1:
                     player.ShowStats();//상태창 보기
                     break;
-                case "2":
+                case 2:
                     player.ShowInventory();//인벤토리 보기
                     break;
-                case "3":
+                case 3:
                     Store(itemList, player);//상점 보기
                     break;
-                case "4":
+                case 4:
                     player.Rest();
                     break;
-                case "5":
+                case 5:
                     DungeonMenu(player);
                     break;
-                case "0":
+                case 0:
                     break;
                 default:
                     Console.WriteLine("\n잘못된 입력입니다.");
@@ -193,18 +180,11 @@ namespace TextRPG_project
                 Console.WriteLine($"경험치\t: {numberDungeonClear} / {level}");
 
                 Console.WriteLine("\n0. 나가기");
-                Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
+                int input = CheckInput(0, 0);
 
-                string input = Console.ReadLine();
-                if(input == "0")
+                if (input == 0)
                 {
                     MainMenu(this);
-                }
-                else
-                {
-                    Console.WriteLine("잘못된 입력입니다.");
-                    Thread.Sleep(1000);
-                    ShowStats();
                 }
             }
 
@@ -226,22 +206,16 @@ namespace TextRPG_project
                 Console.WriteLine("\n1. 장착 관리");
                 Console.WriteLine("0. 나가기");
 
-                Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
-                string input = Console.ReadLine();
+                int input = CheckInput(0, 1);
 
-                if (input == "1")
+
+                if (input == 1)
                 {
                     ItemManagement();
                 }
-                else if(input == "0")
+                else if(input == 0)
                 {
                     MainMenu(this);
-                }
-                else
-                {
-                    Console.WriteLine("잘못된 입력입니다.");
-                    Thread.Sleep(1000);
-                    ShowInventory();
                 }
             }
 
@@ -261,35 +235,20 @@ namespace TextRPG_project
                 }
                 Console.WriteLine("0. 나가기");
 
-                Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
 
-                string input = Console.ReadLine();
-                int input_int;
-                if (int.TryParse(input, out input_int))
+                int input = CheckInput(0, items.Count);
+                
+                if (input == 0)
                 {
-                    if (input_int == 0)
-                    {
-                        ShowInventory();
-                    }
-                    else if (input_int > 0 && input_int <= items.Count)
-                    {
-                        if (items[input_int - 1].equip) Unequip(items[input_int - 1]);
-                        else Equip(items[input_int - 1]);
-                        ItemManagement();
-                    }
-                    else
-                    {
-                        Console.WriteLine("잘못된 입력입니다.");
-                        Thread.Sleep(1000);
-                        ItemManagement();
-                    }
+                    ShowInventory();
                 }
                 else
                 {
-                    Console.WriteLine("잘못된 입력입니다.");
-                    Thread.Sleep(1000);
+                    if (items[input - 1].equip) Unequip(items[input - 1]);
+                    else Equip(items[input - 1]);
                     ItemManagement();
                 }
+                 
             }
 
 
@@ -304,9 +263,9 @@ namespace TextRPG_project
                 Console.WriteLine("0. 나가기");
 
                 Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
-                string input = Console.ReadLine();
+                int input = CheckInput(0, 1);
 
-                if (input == "1")
+                if (input == 1)
                 {
                     if(gold >= 500)
                     {
@@ -324,15 +283,9 @@ namespace TextRPG_project
                         MainMenu(this);
                     }
                 }
-                else if (input == "0")
-                {
-                    MainMenu(this);
-                }
                 else
                 {
-                    Console.WriteLine("잘못된 입력입니다.");
-                    Thread.Sleep(1000);
-                    Rest();
+                    MainMenu(this);
                 }
             }
 
@@ -468,52 +421,35 @@ namespace TextRPG_project
                 else Console.WriteLine(" | 구매 완료");
             }
 
-            Console.WriteLine("\n1. 아이템 구매");
-            Console.WriteLine("0. 나가기\n");
+            Console.WriteLine("\n0. 나가기");
 
-            Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
-            string input = Console.ReadLine();
-            int input_int;
-            if (int.TryParse(input, out input_int))
+            int input = CheckInput(0, items.Count);
+
+            if (input == 0)
             {
-                if (input_int == 0)
+                Store(items, player);
+            }
+            else
+            {
+                if (items[input - 1].sold)
                 {
-                    Store(items, player);
+                    Console.WriteLine("이미 구매한 아이템입니다.");
+                    Thread.Sleep(1000);
                 }
-                else if (input_int > 0 && input_int <= items.Count)
+                else
                 {
-                    if (items[input_int - 1].sold)
+                    if (player.gold > items[input - 1].price)
                     {
-                        Console.WriteLine("이미 구매한 아이템입니다.");
+                        player.Buy(items[input - 1]);
+                        Console.WriteLine("구매를 완료했습니다.");
                         Thread.Sleep(1000);
                     }
                     else
                     {
-                        if (player.gold > items[input_int - 1].price)
-                        {
-                            player.Buy(items[input_int - 1]);
-                            Console.WriteLine("구매를 완료했습니다.");
-                            Thread.Sleep(1000);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Gold가 부족합니다.");
-                            Thread.Sleep(1000);
-                        }
+                        Console.WriteLine("Gold가 부족합니다.");
+                        Thread.Sleep(1000);
                     }
-                    BuyMenu(items, player);
                 }
-                else
-                {
-                    Console.WriteLine("잘못된 입력입니다.");
-                    Thread.Sleep(1000);
-                    BuyMenu(items, player);
-                }
-            }
-            else
-            {
-                Console.WriteLine("잘못된 입력입니다.");
-                Thread.Sleep(1000);
                 BuyMenu(items, player);
             }
         }
@@ -536,45 +472,29 @@ namespace TextRPG_project
                 Console.WriteLine($" | 판매 가격: {player.items[i].price * 85 / 100} G");
             }
 
-            Console.WriteLine("0. 나가기\n");
+            Console.WriteLine("0. 나가기");
 
-            Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
-            string input = Console.ReadLine();
-            int input_int;
-            if (int.TryParse(input, out input_int))
+            int input = CheckInput(0, player.items.Count);
+
+            if (input == 0)
             {
-                if (input_int == 0)
-                {
-                    Store(items, player);
-                }
-                else if (input_int > 0 && input_int <= player.items.Count)
-                {
-                    if (player.items[input_int - 1].sold)
-                    {
-                        player.Sell(player.items[input_int - 1]);
-                        Console.WriteLine("판매가 완료되었습니다.");
-                        Thread.Sleep(1000);
-                    }
-                    else
-                    {
-                        Console.WriteLine("구매하지 않은 아이템입니다.");
-                        Thread.Sleep(1000);
-                    }
-                    SellMenu(items, player);
-                }
-                else
-                {
-                    Console.WriteLine("잘못된 입력입니다.");
-                    Thread.Sleep(1000);
-                    SellMenu(items, player);
-                }
+                Store(items, player);
             }
             else
             {
-                Console.WriteLine("잘못된 입력입니다.");
-                Thread.Sleep(1000);
+                if (player.items[input - 1].sold)
+                {
+                    player.Sell(player.items[input - 1]);
+                    Console.WriteLine("판매가 완료되었습니다.");
+                    Thread.Sleep(1000);
+                }
+                else
+                {
+                    Console.WriteLine("구매하지 않은 아이템입니다.");
+                    Thread.Sleep(1000);
+                }
                 SellMenu(items, player);
-            }
+            } 
         }
 
 
@@ -592,33 +512,29 @@ namespace TextRPG_project
             Console.WriteLine($"1. 쉬운 던전\t\t| 방어력 {diff1} 이상 권장");
             Console.WriteLine($"2. 일반 던전\t\t| 방어력 {diff2} 이상 권장");
             Console.WriteLine($"3. 어려운 던전\t\t| 방어력 {diff3} 이상 권장");
-            Console.WriteLine("0. 나가기\n");
+            Console.WriteLine("0. 나가기");
 
-            Console.Write("\n원하시는 행동을 입력해주세요.\n>> ");
-            string input = Console.ReadLine();
-            if (input == "1")
-            {
-                EnterDungeon(player, diff1);
-
+            int input = CheckInput(0, 3);
+            switch (input) {
+                case 1:
+                    EnterDungeon(player, diff1);
+                    break;
+                case 2:
+                    EnterDungeon(player, diff2);
+                    break;
+                case 3:
+                    EnterDungeon(player, diff3);
+                    break;
+                case 0:
+                    MainMenu(player);
+                    break;
+                default:
+                    Console.WriteLine("Error 발생");
+                    break;
+                
             }
-            else if (input == "2")
-            {
-                EnterDungeon(player, diff2);
-            }
-            else if (input == "3")
-            {
-                EnterDungeon(player, diff3);
-            }
-            else if (input == "0")
-            {
-                MainMenu(player);
-            }
-            else
-            {
-                Console.WriteLine("잘못된 입력입니다.");
-                Thread.Sleep(1000);
-                DungeonMenu(player);
-            }
+        
+        
         }
 
         static void EnterDungeon(Character player, int diff)
@@ -708,6 +624,36 @@ namespace TextRPG_project
 
         }
 
+        static int CheckInput(int min, int max)
+        {
+            Console.WriteLine("\n원하시는 행동을 선택해주세요.");
+            Console.Write(">>");
+            int result;
+            string input = Console.ReadLine();
+            bool isNumber = int.TryParse(input, out result);
+            if (isNumber)
+            {
+                if (result >= min && result <= max)
+                {
+                    return result;
+                }
+            }
+            Console.WriteLine("잘못된 입력입니다.");
+            Thread.Sleep(1000);
+            ClearPreviousLines(4);
+            return CheckInput(min, max);
+        }
+
+        static void ClearPreviousLines(int numberOfLines)
+        {
+            int currentLineCursor = Console.CursorTop;
+            for (int i = 0; i < numberOfLines; i++)
+            {
+                Console.SetCursorPosition(0, currentLineCursor - 1 - i);
+                Console.Write(new string(' ', Console.WindowWidth));
+            }
+            Console.SetCursorPosition(0, currentLineCursor - numberOfLines);
+        }
 
         //static void SaveCharacter(Character character, string filePath)
         //{
